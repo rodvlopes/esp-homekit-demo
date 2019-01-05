@@ -17,9 +17,12 @@ static void wifi_init() {
         .password = WIFI_PASSWORD,
     };
 
+
+    printf("Starting WIFI connection attempt...\n");
     sdk_wifi_set_opmode(STATION_MODE);
     sdk_wifi_station_set_config(&wifi_config);
     sdk_wifi_station_connect();
+    printf("Finished WIFI connection attempt.\n");
 }
 
 const int led_gpio = 2;
@@ -32,6 +35,7 @@ void led_write(bool on) {
 void led_init() {
     gpio_enable(led_gpio, GPIO_OUTPUT);
     led_write(led_on);
+    printf("LED initialized\n");
 }
 
 void led_identify_task(void *_args) {

@@ -1,4 +1,5 @@
 #include <stdio.h>
+// #include <espressif/user_interface.h>
 #include <espressif/esp_wifi.h>
 #include <espressif/esp_sta.h>
 #include <espressif/esp_common.h>
@@ -13,10 +14,13 @@
 #include <homekit/characteristics.h>
 #include "wifi.h"
 
+
 static void wifi_init() {
     struct sdk_station_config wifi_config = {
         .ssid = WIFI_SSID,
         .password = WIFI_PASSWORD,
+	.bssid_set = 1,
+	.bssid = {0x48, 0xf8, 0xb3, 0xd5, 0x5f, 0x46},
     };
 
 
@@ -114,12 +118,12 @@ homekit_server_config_t config = {
 ETSTimer hb_timer;
 
 void hb_alarm(void *arg) {
-	printf("Heartbeat\n");
+	printf("%d Heartbeat\n", xTaskGetTickCount() * portTICK_PERIOD_MS );
 }
 
 void heartbeat_init(void) {
 	sdk_os_timer_setfn(&hb_timer, hb_alarm, NULL);
-	sdk_os_timer_arm(&hb_timer, 2000, true); // id, ms, repeat
+	sdk_os_timer_arm(&hb_timer, 250, true); // id, ms, repeat
 }
 
 
@@ -141,10 +145,12 @@ void buttonIntTask(void *pvParameters)
         if(last < button_ts-200) {
             printf("Button interrupt fired at %dms\r\n", button_ts);
             last = button_ts;
-	    /*btn action goes here*/
-	    led_on = !led_on;
-	    led_write(led_on);
-	    homekit_characteristic_notify(&led_characteristic, HOMEKIT_BOOL(led_on));
+            /*btn action goes here*/
+            led_on = !led_on;
+            led_write(led_on);
+            homekit_characteristic_notify(&led_characteristic, HOMEKIT_BOOL(led_on));
+            // sdk_system_deep_sleep(30*1000*1000);
+            // printf("It should go sleep\n");
         }
     }
 }
